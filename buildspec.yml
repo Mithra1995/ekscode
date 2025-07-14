@@ -3,29 +3,25 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo Setting environment variables...
-      - export ACCOUNT_ID=382828593676
-      - export REGION=us-east-1
-      - export REPO_NAME=spring-demo-ecr
-      - export IMAGE_TAG=v1.$CODEBUILD_BUILD_NUMBER
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+      - IMAGE_TAG=v1.$CODEBUILD_BUILD_NUMBER
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 382828593676.dkr.ecr.us-east-1.amazonaws.com
 
   build:
     commands:
       - echo Building the JAR file...
       - mvn clean install
       - echo Building Docker image...
-      - docker build -t $REPO_NAME:$IMAGE_TAG .
-      - docker tag $REPO_NAME:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO_NAME:$IMAGE_TAG
+      - docker build -t spring-demo-ecr:$IMAGE_TAG .
+      - docker tag spring-demo-ecr:$IMAGE_TAG 382828593676.dkr.ecr.us-east-1.amazonaws.com/spring-demo-ecr:$IMAGE_TAG
 
   post_build:
     commands:
       - echo Pushing Docker image to Amazon ECR...
-      - docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO_NAME:$IMAGE_TAG
+      - docker push 382828593676.dkr.ecr.us-east-1.amazonaws.com/spring-demo-ecr:$IMAGE_TAG
       - echo Creating final deployment files...
       - mkdir -p k8s-out
-      - sed "s|IMAGE_PLACEHOLDER|$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$REPO_NAME:$IMAGE_TAG|g" k8s/deployment.yaml > k8s-out/deployment.yaml
+      - sed "s|IMAGE_PLACEHOLDER|382828593676.dkr.ecr.us-east-1.amazonaws.com/spring-demo-ecr:$IMAGE_TAG|g" k8s/deployment.yaml > k8s-out/deployment.yaml
       - cp k8s/service.yaml k8s-out/service.yaml
       - ls -R
 

@@ -40,7 +40,8 @@ phases:
       - cat k8s-out/deployment.yaml
 
 artifacts:
-  base-directory: k8s-out
+  base-directory: .
   files:
-    - deployment.yaml
-    - service.yaml
+    - k8s-out/deployment.yaml
+    - k8s-out/service.yaml
+

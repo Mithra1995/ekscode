@@ -1,30 +1,28 @@
 version: 0.2
 
 phases:
+  install:
+    runtime-versions:
+      java: corretto11
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - IMAGE_TAG=v1.$CODEBUILD_BUILD_NUMBER
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 382828593676.dkr.ecr.us-east-1.amazonaws.com
-
   build:
     commands:
       - echo Building the JAR file...
       - mvn clean install
       - echo Building Docker image...
-      - docker build -t spring-demo-ecr:$IMAGE_TAG .
-      - docker tag spring-demo-ecr:$IMAGE_TAG 382828593676.dkr.ecr.us-east-1.amazonaws.com/spring-demo-ecr:$IMAGE_TAG
-
+      - docker build -t spring-demo-ecr:v1.$CODEBUILD_BUILD_NUMBER .
+      - docker tag spring-demo-ecr:v1.$CODEBUILD_BUILD_NUMBER 382828593676.dkr.ecr.us-east-1.amazonaws.com/spring-demo-ecr:v1.$CODEBUILD_BUILD_NUMBER
   post_build:
     commands:
       - echo Pushing Docker image to Amazon ECR...
-      - docker push 382828593676.dkr.ecr.us-east-1.amazonaws.com/spring-demo-ecr:$IMAGE_TAG
+      - docker push 382828593676.dkr.ecr.us-east-1.amazonaws.com/spring-demo-ecr:v1.$CODEBUILD_BUILD_NUMBER
       - echo Creating final deployment files...
       - mkdir -p k8s-out
-      - sed "s|IMAGE_PLACEHOLDER|382828593676.dkr.ecr.us-east-1.amazonaws.com/spring-demo-ecr:$IMAGE_TAG|g" k8s/deployment.yaml > k8s-out/deployment.yaml
+      - sed "s|IMAGE_PLACEHOLDER|382828593676.dkr.ecr.us-east-1.amazonaws.com/spring-demo-ecr:v1.$CODEBUILD_BUILD_NUMBER|g" k8s/deployment.yaml > k8s-out/deployment.yaml
       - cp k8s/service.yaml k8s-out/service.yaml
-      - ls -R
-
 artifacts:
   base-directory: k8s-out
   files:

@@ -44,4 +44,6 @@ artifacts:
   files:
     - k8s-out/deployment.yaml
     - k8s-out/service.yaml
+  discard-paths: no
+
 

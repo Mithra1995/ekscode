@@ -75,3 +75,9 @@ The project architecture includes:
 apiVersion: apps/v1
 kind: Deployment
 ...
+
+
+# service.yaml
+apiVersion: v1
+kind: Service
+...
